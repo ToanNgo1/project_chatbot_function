@@ -345,8 +345,8 @@ def chat_bot(user_name):
             
             #new_answer_jp: str=input('japanese version please!: ')
 
-            if (user_choice.lower() == "y"):
-                new_answer: str = input('type the answer: ').strip()
+            if (user_choice.lower() == "y"):                                    #this is were the learning happen and it still currenly under development. however if needed you can use this to teach the bot how to respond.  
+                new_answer: str = input('type the answer: ').strip()            
                 new_answer_jp: str=input('japanese version please!: ')
                 terminal_com=input("terminal com: ")
                 knowledge_base['ai_knowlege'].append({"tag": "N","question": [user_input], "answer": [new_answer], 'answer_jp': [new_answer_jp],'terminal_command':[]})
