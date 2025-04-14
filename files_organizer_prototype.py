@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 """files organizer"""
-__author__=""
+__author__="Toan Ngo"
 #prototype 
+#version=0.5
 import os
 import shutil
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -10,7 +11,7 @@ black_list=["files_organizer_prototype"]       #files name for black list
 #stop_command=[]     #un-use for now
 #                       work function
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-def moving_file(dst_path,main_directory,file_type):
+def moving_file(dst_path,main_directory,file_type,file_name):
     undo_key=[main_directory,dst_path,file_type]
     try:
         os.chdir(main_directory)        #point to the main where you will be moving the file
@@ -21,7 +22,18 @@ def moving_file(dst_path,main_directory,file_type):
         #print(os.path.splitext(file)[0])
         if os.path.splitext(file)[0] in black_list:
              continue
-        if file.endswith(file_type):
+        if os.path.splitext(file)[0]==file_name and file_name!="":
+            print(os.path.splitext(file)[0])
+            packet=os.path.join(main_directory,file)
+            #count=0
+            if  not os.path.exists(os.path.join(dst_path,file)):
+                print(f"moving file {file} to {dst_path} now")
+                #
+                shutil.move(packet,dst_path)
+            else:
+                print(F"this file {file} already exist in the destination of the directory(unmove)")
+
+        elif file.endswith(file_type) and file_type!="":
             packet=os.path.join(main_directory,file)
             count=0
             if  not os.path.exists(os.path.join(dst_path,file)):
@@ -30,10 +42,6 @@ def moving_file(dst_path,main_directory,file_type):
                 shutil.move(packet,dst_path)
             else:
                 print(F"this file {file} already exist in the destination of the directory(unmove)")
-            ''' extrac_start,extrac_end=os.path.splitext(file)
-            count+=1
-            oldname=packet
-            newname=os.path.join(main_directory,f"{extrac_start}_{count}{extrac_end}")'''
     return undo_key
 
              
@@ -45,29 +53,22 @@ def rever_move(list_path:list):
     return container    #(1.2.3)
 
 def check_sub(dst_path,mode:str|None)->list:   #target folder mode
-    #needed_sub=['document','code','video','image','web']
     container=[]
     packet_return=[]
     for files in os.listdir(dst_path):
-          path_check=os.path.join(dst_path,files)
-          #print(path_check)
+          path_check=os.path.join(dst_path,files) 
           if os.path.isfile(path_check):            #scan the files to get their extenstion 
             extenstion_cut_beginning,extenstion_cut_end=os.path.splitext(files)
-            #print(f"beginning of file {extenstion_cut_beginning}")
-            #print(f"end of the file{extenstion_cut_end}")
             container.append(extenstion_cut_end)
-    #now all the files have theirs extenstion cutoff
-   # print(f"before {container}")
     container=list(set(container))
-  #  print(container)
     for items in container:     #only return the extenstion of what folder are needed
-        # print(f"items {items}")
          category_packet=category(items)
-         #print(category_packet)
          packet_return.append(category_packet)
+    packet_return=list(set(packet_return))
+    print(packet_return)
     if(mode=='[1]'):            #create the folder
         for folder in packet_return:
-            if(folder==None):               #skip files type that the program not understand yet: you can change this by modifind the category section.
+            if(folder==None):               #skip files type that the program not understand yet: you can change this by modify the category section.
                  packet_return.remove(folder)
                  continue
             absolute_path=os.path.join(dst_path,folder)#the route of the folders 
@@ -76,32 +77,32 @@ def check_sub(dst_path,mode:str|None)->list:   #target folder mode
                 os.makedirs(absolute_path)
             else:
                 print(f"this folders already exist {folder}" )
-       # print(os.listdir(dst_path))
     else:
         return packet_return
 
 def category(files_extent):
-    image_extension=['.jpg', '.jpeg', '.png', '.gif', '.bmp']
+    image_extension=['.jpg', '.jpeg', '.png', '.gif','.bmp']
     video_extension=['.mp4', '.avi', '.mkv', '.mov']
-    document_extension=[ '.txt','.docx', '.pdf', '.xlsx']
+    document_extension=[ '.txt','.docx', '.pdf', '.xlsx','.odt']
+    excel_extension=['.ods','.xlsm']
     code_extension=['.py','.ipynb','.java','.js','.class'] #update if you want to add more extenstion to the container folders  
     web_extension=['.htm','.css']
-    web_aplication=['.url',]
+    web_aplication=['.url']
     #sample_injeck=['.txt']
-    #print(f'files_extent {files_extent}')
     if files_extent in image_extension:
                 return "Image_files"                #this is the name of the folder that it will create
     elif files_extent in video_extension:
                 return "Video_files"
     elif files_extent in document_extension:
-                #print(f"exten {exten}")
                 return "Document_files"
     elif files_extent in code_extension:
                 return "Code_files"
     elif files_extent in web_extension:
-                return "webDevelopment_files"
+                return "WebDevelopment_files"
     elif files_extent in web_aplication:
-                return"webApps"
+                return "WebApps"
+    elif files_extent in excel_extension:
+                return "Excel_spreadsheet"
     #elif files_extent in sample_inject:
     #            return "sample folder name"
     else:
@@ -123,60 +124,39 @@ def arrange_files (dst_path):                   #this responsible for making fol
         else:
             print(f"this folders already exist {folder}" )
 
-    #os.chdir(dst_path)
-   # print(os.listdir(dst_path))
     for files in os.listdir(dst_path):
         file_path_check=os.path.join(dst_path,files)
-        #print(f"{file_path_check} test")
         if os.path.isfile(file_path_check):
             category_check=os.path.splitext(files)[1]
             blackList_check=os.path.splitext(files)[0]
             if(blackList_check in black_list ):
                  continue
             extention_check=category(category_check)
-           # print(f"ext {extention_check}")
             if extention_check in sub_folder:
-                #print(files)                   #black list
                 new_file_name=os.path.join(dst_path,files)   
                 locate=os.path.join(dst_path,extention_check)#location os the folder you can put file to
-                #print(os.path.exists(os.path.join(locate,files)))
-                #print(locate)
-                #print(os.path.join(locate,files))
                 count=1
                 if os.path.exists(os.path.join(locate,files)):
                     while True:
                         exten=os.path.splitext(files)[1]
                         main=os.path.splitext(files)[0].rsplit("_",1)[0]
-                        print(main)
-                        print(f"exten {exten}")
                         old_name=new_file_name
                         new_file_name=os.path.join(dst_path,f"{main}_{count}{exten}")
-                       # print(old_name)
-                        #print(new_file_name)
                         os.rename(old_name,new_file_name)
-                       # print(os.path.exists(os.path.join(locate,f"{main}_{count}{exten}")))
                         
                         if(os.path.exists(os.path.join(locate,f"{main}_{count}{exten}"))):
                             count+=1
-                            #print(os.path.join(locate,new_file_name))
-                            #print("stop")
                             continue
                         else:
                              break
-                #print("now movving file")
-                #print(new_file)
-                #print(locate)
                 
                 shutil.move(new_file_name,locate)
 
 def search_folder(target_directory:str,extenstion:str,file_name:str)->list|str:
-    #return_packet=[]
-    #return_packet_alt=[]
     return_packet_alt_dict={}
     search_condition=False
     key="go"
-     #move pointer to the destination 
-    #print("check")
+    #move pointer to the destination 
     try:
         os.chdir(target_directory)              #change directory
     except:
@@ -186,14 +166,11 @@ def search_folder(target_directory:str,extenstion:str,file_name:str)->list|str:
     list_file=os.listdir(target_directory)
           
     for files in list_file:
-        #print(files)
         check=os.path.join(target_directory,files)
         if os.path.isfile(check):
             if(extenstion=="none"):
                 file_name_extract=os.path.splitext(files)[0]
                 if(file_name in file_name_extract):
-                    #print("yes")
-                    #return_packet_alt.append(files)
                     return_packet_alt_dict[files]=check
                     key="stop"
             elif(file_name=="none"):
@@ -201,41 +178,40 @@ def search_folder(target_directory:str,extenstion:str,file_name:str)->list|str:
                 if(extenstion_extract==extenstion):
                     if key=="go":
                         key="stop"
-                    #return_packet_alt.append(files)
                     return_packet_alt_dict[files]=check         #contain files name and route
             else:    
                 return_packet_alt_dict[files]=check
-                #print("int")
-                #print(return_packet_alt_dict)
-        #if(extenstion==None):
+
     if (key=="go") and  (len(return_packet_alt_dict)>0):      
         file_name_com=file_name+extenstion      #if both name and type are know 
         if file_name_com in return_packet_alt_dict:
-            '''items_index=return_packet.index(file_name_com)
-            extract=str(return_packet.pop(items_index))
-            route=os.path.join(target_directory,extract)'''
             route=return_packet_alt_dict[file_name_com]
             search_condition=True
     elif key=="stop":
          print("here all the files that similar to the requested files ")
-         #print(return_packet_alt_dict)
          for item,value in return_packet_alt_dict.items():
-              print(f'{item}:\t {value}')
-    if search_condition:
+            print(f'{item}:\t {value}')
+    elif search_condition:            #find the file !!
         print(f'{file_name_com}:\t{route}')
-        #print(return_packet_alt_dict)
+        return
     else:
         if not return_packet_alt_dict:
              print("there are no files with that name and extenstion ")
-       # else:
-        #    print(return_packet)
         else:
              print("there are no files in the target directory")
 
 def check_directory(main_directory:str)->list:          #return what directory in the current destination
      route=main_directory
+     #print(route)
      container_directory=[directory for directory in os.listdir(route) if os.path.isdir(os.path.join(route,directory))]
-     return container_directory
+     container_files=[directory for directory in os.listdir(route) if os.path.isfile(os.path.join(route,directory))]
+     return container_directory,container_files
+def check_file(main_directory:str)->list:
+     route=main_directory
+     print("these are the files in the current selected location")
+     for items in os.listdir(route):
+          if(os.path.isfile(items)):
+                print(f"{items} \n -----------------------------------------------------------------------")
 #-------------------------------------------------------------------------------------------------------------------------
 #                                                user input handle
 #-------------------------------------------------------------------------------------------------------------------------
@@ -248,7 +224,7 @@ def case_check(x):
             return "arrange all"
         case "search":
             return "search"
-        case "create_folders":
+        case "create folders":
             return "create folders"
         case "check directory":
             return "check directory"
@@ -300,9 +276,10 @@ def input_func():
                 print(f'current selected mode: {number_short}')
                 activation(number_short)
                 return number_short
-        elif(user_process.isalpha()):
-            print("text")
+        elif(user_process):
+            #print("text")
             packet=case_check(user_process.lower())
+            #print(packet)
             if packet:    
                 print(f'current selected mode: {packet}')
                 activation(packet)
@@ -310,49 +287,40 @@ def input_func():
                 #print("sample")
                 #print(stop_command)
                 return packet
-        user_input=input("there are no function for that !!!!\n sellect on of these [move,arrange,search,create_folders] or select from 1-5: ")
+        user_input=input("there are no function for that !!!!\n sellect on of these [arrange,move,search,create_folders,check directory] or select from 1-5: ")
 
 def activation(mode:str)->None:
     #one directory mode
     #check_point=["","none"]
    # bot=False
-    check=input("you want to use local files [execution] or [change directory]: ").strip().lower()
+    check=input("you want to use local files [execution](do stuff where this file is located) or [change directory]: ").strip().lower()
     check_re=True
     while True:
         if check in ["quit","terminate","stop","exit"]:
              return
         if check in["execution local","lex"]:
+            check_re=False
             break
         elif check in ["change directory","cd"]:
-            user_currentDT=input("please enter the current directory: ")
+            user_currentDT=input("please enter the current/target directory: ")
             if os.path.exists(user_currentDT):
                 break
             else:
-                 print("path doesnt exits !")
+                 print("path doesn't exits !")
         else:
             check=input("please enter execution local or change directory: ").strip().lower()
 
     if mode in ["arrange all","search","create folders","check directory"]:       #all these only need one directory
         if check_re==False:
             user_currentDT=os.getcwd()                          #local execution mode
-            #user_currentDT=input("please enter the current directory: ")
+            print(user_currentDT)
             if mode =="arrange all":
-                #sort all files in the folder
-                #user_choice=input("would you like to run this where the this file current located ? y/n: ").strip().lower()
-                #if(user_choice in["n","no"]):
-                #    print("path")
-                #    arrange_files(user_currentDT)
-
-                #else:
-                #    print("current")
-                #    arrange_files(os.getcwd())
-
                 print("function call arrange")
                 arrange_files(user_currentDT)
 
             elif mode=="check directory":
-                print(check_directory(user_currentDT))
-
+                packet=check_directory(user_currentDT)
+                print(f"Here are the folder in the selected directory: {packet[0]} \nHere is the files in the selected directory: {packet[1]}")
             elif mode =="search":
                 #search the folder 
                 #extra function 
@@ -362,7 +330,10 @@ def activation(mode:str)->None:
                 #check point()
                 files_extent=files_extent.lower().strip()
                 file_name=file_name.lower().strip()
-                if files_extent == "" or file_name == "":
+                if(files_extent == "" and file_name == ""):
+                    print("cant not conduct a search if missing both extention and name.....")
+                    return
+                if (files_extent == "" or file_name == ""):
                     print("function call search: ")
                     if(files_extent == ""):
                         files_extent="none"
@@ -380,18 +351,9 @@ def activation(mode:str)->None:
                     check_sub(user_currentDT,'[1]')
             return user_currentDT
                     
-        else:                   #change of directory mode also only mode run by tomoe
-             #user_currentDT=input("please enter the current directory: ")
+        else:                   #change of directory mode also only mode run by bot
             if mode =="arrange all":
                 #sort all files in the folder
-                #user_choice=input("would you like to run this where the this file current located ? y/n: ").strip().lower()
-                #if(user_choice in["n","no"]):
-                #    print("path")
-                #    arrange_files(user_currentDT)
-
-                #else:
-                #    print("current")
-                #    arrange_files(os.getcwd())
 
                 print("function call arrange")
                 arrange_files(user_currentDT)
@@ -401,10 +363,13 @@ def activation(mode:str)->None:
                 #extra function 
                 print("note:\n this search funtion can only run if you know what files name you looking for or the extention of the files")
                 files_extent=input("please enter the files extention if you know (or leave it empty): ")
-                file_name=input("please enter the files name of the search aplication( or leave it empty): ")
+                file_name=input("please enter the files name of the search application( or leave it empty): ")
                 #check point()
                 files_extent=files_extent.lower().strip()
                 file_name=file_name.lower().strip()
+                if(files_extent == "" and file_name == ""):
+                    print("cant not conduct a search if missing both extention and name.....")
+                    return
                 if files_extent == "" or file_name == "":
                     print("function call search ")
                     if(files_extent == ""):
@@ -418,7 +383,8 @@ def activation(mode:str)->None:
                     search_folder(user_currentDT,files_extent,file_name)
 
             elif mode=="check directory":
-                print(check_directory(user_currentDT))
+                packet=check_directory(user_currentDT)
+                print(f"Here are the folder in the selected directory: {packet[0]} \nHere is the files in the selected directory: {packet[1]}")
 
             else:
                 #create a folder for each files type
@@ -430,13 +396,18 @@ def activation(mode:str)->None:
     else:#move file from one diractory to another:
         #move file
         user_destinationDT=input("please enter the folder that you want to move files into: ")
+        if(check_re==False):
+              user_currentDT=os.getcwd()
         if(os.path.exists(user_currentDT)):
-            file_type=input("enter the file type you want move")
-            if(file_type.strip()==""):
-                print("there are no file type move")
-            else:
+            check_file(user_currentDT)      #check files
+            file_type=input("enter the file extension type you want move(leave this empty if you want to move a specific file)")
+            file_name=input("name of the file? (or just leave this empty if you dont know)")
+            print(file_name)
+            if((file_type.strip()!="" and file_name.strip()=="") or (file_type.strip()=="" and file_name.strip()!="")):
                 print("move function")
-                moving_file(user_destinationDT,user_currentDT,file_type)
+                moving_file(user_destinationDT,user_currentDT,file_type,file_name)
+            else:
+                print("there are no file type move")
         else:
              print("path do not exist !")
         
@@ -452,7 +423,7 @@ def write_to_memo(DT:str)->str:
 def driver_organize():
     while True:
         user_receive=input_func()
-        print(user_receive)
+        #print(user_receive)
         if user_receive=="exit":
             break
         #do stuff here
@@ -466,7 +437,6 @@ def driver_organize():
 #--------------------------------------------------------------------------------------------------------------------
 if __name__=="__main__":
     black_list.append("notev3")
-    #t=threading.Thread(thread1,"loading")
     while True:
         user_receive=input_func()
         print(user_receive)
@@ -476,6 +446,6 @@ if __name__=="__main__":
         #activation(user_receive)
         #----------------------------------------------
         more=input("do you want to do something else?: ")
-        if(more.lower() in["no","exit","done"] ):
+        if(more.lower() in["no","exit","done","quit"] ):
             break
     print("terminating")
